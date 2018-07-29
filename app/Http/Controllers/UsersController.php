@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 
 use App\User;
 
+use App\Micropost;
+
 class UsersController extends Controller
 {
     //
@@ -61,5 +63,18 @@ class UsersController extends Controller
         $data += $this->counts($user);
 
         return view('users.followers', $data);
+    }
+    public function user_favorite($id)
+    {
+        $user = User::find($id);
+        $favpost = $user->favorite_model()->paginate(10);
+
+        $data = [
+            'user' => $user,
+            'favpost' => $favpost,
+        ];
+
+        $data += $this->counts($user);
+        return view('users.favorite', $data);
     }
 }

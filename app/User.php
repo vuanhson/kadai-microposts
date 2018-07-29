@@ -34,7 +34,7 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(User::class, 'user_follow', 'user_id', 'follow_id')->withTimestamps();
     }
-
+    
     public function followers()
     {
         return $this->belongsToMany(User::class, 'user_follow', 'follow_id', 'user_id')->withTimestamps();
@@ -82,5 +82,51 @@ class User extends Authenticatable
         $follow_user_ids = $this->followings()-> pluck('users.id')->toArray();
         $follow_user_ids[] = $this->id;
         return Micropost::whereIn('user_id', $follow_user_ids);
+    }
+    
+    // list post favorited by user
+    public function favorite_model()
+    {
+        return $this->belongsToMany(Micropost::class, 'post_favorite', 'user_id', 'microposts_id')->withTimestamps();
+    }
+    
+    // list user favorited by post
+    public function was_favorited_model()
+    {
+        return $this->belongsToMany(Micropost::class, 'post_favorite', 'microposts_id', 'user_id')->withTimestamps();
+    }
+    
+    public function favorite($micropostId)
+    {
+        
+        $exist = $this->is_favorite($micropostId);
+        
+        // $its_me = $this->id == $userId;
+    
+        if ($exist) {
+            return false;
+        } else {
+            $this->favorite_model()->attach($micropostId);
+            return true;
+        }
+    }
+    
+    public function unfavorite($micropostId)
+    {
+        
+        $exist = $this->is_favorite($micropostId);
+
+    
+        if ($exist) {
+            $this->favorite_model()->detach($micropostId);
+            return true;
+        } else {
+            // 未フォローであれば何もしない
+            return false;
+        }
+    }
+    
+    public function is_favorite($userId) {
+        return $this->favorite_model()->where('microposts_id', $userId)->exists();
     }
 }

@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 class MicropostsController extends Controller
 {
     //
-     public function index()
+    public function index()
     {
         $data = [];
         if (\Auth::check()) {
